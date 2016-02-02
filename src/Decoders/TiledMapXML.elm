@@ -1,4 +1,4 @@
-module Decoders.Map where
+module Decoders.TiledMapXML where
 
 import Json.Decode exposing (Decoder,(:=),list,int)
 
@@ -6,7 +6,7 @@ import Decoders.Layer as Layer exposing (Layer)
 import Decoders.Tileset as Tileset exposing (Tileset)
 
 
-type alias Map =
+type alias TiledMapXML =
   { height : Int
   , width : Int
   , tileheight : Int
@@ -21,9 +21,9 @@ type alias Map =
   }
 
 
-decoder : Decoder Map
+decoder : Decoder TiledMapXML
 decoder =
-    Json.Decode.object6 Map
+    Json.Decode.object6 TiledMapXML
       ("height" := int)
       ("width" := int)
       ("tileheight" := int)
