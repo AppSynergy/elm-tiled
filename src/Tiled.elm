@@ -1,2 +1,4 @@
+module Tiled where
 
-foo = 42
+foo =
+  Debug.log "Hello" "world"
