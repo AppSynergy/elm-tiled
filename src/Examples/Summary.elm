@@ -25,7 +25,7 @@ viewTileset ts =
     dims ts = " (" ++ (toString ts.tileheight) ++
       "x" ++ (toString ts.tileheight) ++ ")"
   in
-  div []
+  div [class "tileset"]
     [ h2 [] [text (ts.name ++ (dims ts))]
     , ul [] (List.map viewTile (List.reverse ts.tiles))
     ]

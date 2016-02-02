@@ -1,0 +1,24 @@
+
+html body {
+  background-color: #e5f7e1;
+}
+
+.tileset {
+  float: left;
+  width: 29%;
+  background-color: white;
+  margin: 0 2%;
+  padding: 10px;
+}
+
+.tileset li {
+  text-align: right;
+  list-style-type: none;
+  border-bottom: 1px solid #e5f7e1;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+}
+
+.tileset li em {
+  padding: 0 15px;
+}

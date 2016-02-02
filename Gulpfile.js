@@ -29,6 +29,6 @@ gulp.task('elm', function() {
 
 
 gulp.task('index', function() {
-  return gulp.src('assets/index.html')
+  return gulp.src('assets/{*.html,*.css}')
     .pipe(gulp.dest('build/'));
 });
