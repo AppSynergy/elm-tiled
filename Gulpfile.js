@@ -13,7 +13,7 @@ gulp.task('default', ['elm', 'index']);
 
 
 gulp.task('watch', function() {
-  gulp.watch('src/**', ['elm']);
+  gulp.watch('{src/**,assets/**}', ['elm','index']);
 });
 
 

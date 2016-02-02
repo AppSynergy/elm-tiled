@@ -4,6 +4,31 @@
     <script src="Tiled.js" type="text/javascript"></script>
   </head>
   <body>
-    <script type="text/javascript">Elm.fullscreen(Elm.Tiled)</script>
+    <div id="main"></div>
+    <script type="text/javascript">
+
+      function loadJSON(src, callback) {
+        var xobj = new XMLHttpRequest();
+        xobj.overrideMimeType("application/json");
+        xobj.open('GET', src, true);
+        xobj.onreadystatechange = function () {
+          if (xobj.readyState == 4 && xobj.status == "200") {
+            callback(xobj.responseText);
+          }
+        };
+        xobj.send(null);
+      }
+
+      var app = Elm.embed(
+        Elm.Tiled,
+        document.getElementById('main'),
+        {tiledjson: ""}
+      );
+
+      loadJSON('../assets/Tiled2.json', function(response) {
+        app.ports.tiledjson.send(JSON.parse(response));
+      });
+
+    </script>
   </body>
 </html>
