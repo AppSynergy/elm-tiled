@@ -7,8 +7,8 @@ import Decoders.Tile as Tile exposing (Tile)
 
 type alias Tileset =
   { name : String
-  , tileheight : Int
-  , tilewidth : Int
+  , height : Int
+  , width : Int
   , tilecount : Int
   , tiles : List (String, Tile)
   -- , properties : ?

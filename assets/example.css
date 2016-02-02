@@ -3,9 +3,13 @@ html body {
   background-color: #e5f7e1;
 }
 
+h1 {
+  clear: both;
+}
+
 .tileset {
   float: left;
-  width: 29%;
+  width: 34%;
   background-color: white;
   margin: 0 2%;
   padding: 10px;

@@ -3,6 +3,7 @@ module Examples.Summary where
 import Decoders.TiledMapXML as TMX
 import Decoders.Tileset exposing (Tileset)
 import Decoders.Tile exposing (Tile)
+import Decoders.Layer exposing (Layer)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -13,20 +14,34 @@ view : TMX.TiledMapXML -> Html
 view data =
   div [class "summary"]
     [ div [class "tilesets"]
-      [ h1 [] [text "Tilesets"]
+      [ h1 [] [text "Layers"]
+      , div [] (List.map viewLayer data.layers)
+      , h1 [] [text "Tilesets"]
       , div [] (List.map viewTileset data.tilesets)
       ]
     ]
 
 
+viewLayer : Layer -> Html
+viewLayer layer =
+  div [class "layer"]
+    [ h2 [] [text (layer.name ++ " " ++ (dimensions layer))]
+    , div [] [(viewLayerData layer)]
+    ]
+
+
+viewLayerData : Layer -> Html
+viewLayerData layer =
+  let
+    f = (\y x -> x ++ (toString y))
+  in
+  div [] [text (List.foldl f " " layer.data)]
+
+
 viewTileset : Tileset -> Html
 viewTileset ts =
-  let
-    dims ts = " (" ++ (toString ts.tileheight) ++
-      "x" ++ (toString ts.tileheight) ++ ")"
-  in
   div [class "tileset"]
-    [ h2 [] [text (ts.name ++ (dims ts))]
+    [ h2 [] [text (ts.name ++ " " ++ (dimensions ts))]
     , ul [] (List.map viewTile (List.reverse ts.tiles))
     ]
 
@@ -43,3 +58,9 @@ viewTile (str, tile) =
       , class "image"
       ] []
     ]
+
+
+dimensions : { a | height : Int, width : Int } -> String
+dimensions x =
+  "(" ++ (toString x.width) ++
+  "x" ++ (toString x.height) ++ ")"
