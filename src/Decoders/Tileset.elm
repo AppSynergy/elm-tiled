@@ -2,14 +2,15 @@ module Decoders.Tileset where
 
 import Json.Decode exposing (Decoder,(:=),keyValuePairs,int,string)
 
-type alias Tile = ( String, List ( String, String ) )
+import Decoders.Tile as Tile exposing (Tile)
+
 
 type alias Tileset =
   { name : String
   , tileheight : Int
   , tilewidth : Int
   , tilecount : Int
-  , tiles : List Tile
+  , tiles : List (String, Tile)
   -- , properties : ?
   -- , spacing : Int  ...etc
   }
@@ -22,4 +23,4 @@ decoder =
       ("tileheight" := int)
       ("tilewidth" := int)
       ("tilecount" := int)
-      ("tiles" := (keyValuePairs (keyValuePairs string)))
+      ("tiles" := (keyValuePairs Tile.decoder))
