@@ -25,7 +25,7 @@
         {tiledjson: ""}
       );
 
-      loadJSON('../assets/Tiled2.json', function(response) {
+      loadJSON('../assets/Tiled.json', function(response) {
         app.ports.tiledjson.send(JSON.parse(response));
       });
 
