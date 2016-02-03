@@ -8,6 +8,7 @@ import Decoders.Layer exposing (Layer)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Graphics.Element exposing (show)
+import String
 
 
 view : TMX.TiledMapXML -> Html
@@ -52,22 +53,27 @@ viewLayerTile tilesets d =
 
 viewLayerTileImg : List Tileset -> Int -> Html
 viewLayerTileImg tilesets d =
-  text (toString d)
-
+  div [class "filled"] [text (toString d)]
 
 
 viewTileset : Tileset -> Html
 viewTileset ts =
   div [class "tileset"]
     [ h2 [] [text (ts.name ++ " " ++ (dimensions ts))]
-    , ul [] (List.map viewTile (List.reverse ts.tiles))
+    , ul [] (List.map (viewTile ts.firstgid) (List.reverse ts.tiles))
     ]
 
 
-viewTile : (String, Tile) -> Html
-viewTile (str, tile) =
+viewTile : Int -> (String, Tile) -> Html
+viewTile firstgid (strId, tile) =
+  let
+    intId = String.toInt strId
+    id = case intId of
+      Ok i -> i + firstgid
+      Err s -> 0
+  in
   li []
-    [ strong [] [text ("id: " ++ str )]
+    [ strong [] [text ("gid: " ++ (toString id) )]
     , em [class "path"] [text tile.image]
     , img
       [ src ("../assets/" ++ tile.image)
