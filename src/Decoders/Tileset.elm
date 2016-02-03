@@ -10,6 +10,7 @@ type alias Tileset =
   , height : Int
   , width : Int
   , tilecount : Int
+  , firstgid : Int
   , tiles : List (String, Tile)
   -- , properties : ?
   -- , spacing : Int  ...etc
@@ -18,9 +19,10 @@ type alias Tileset =
 
 decoder : Decoder Tileset
 decoder =
-    Json.Decode.object5 Tileset
+    Json.Decode.object6 Tileset
       ("name" := string)
       ("tileheight" := int)
       ("tilewidth" := int)
       ("tilecount" := int)
+      ("firstgid" := int)
       ("tiles" := (keyValuePairs Tile.decoder))

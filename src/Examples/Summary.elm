@@ -15,27 +15,45 @@ view data =
   div [class "summary"]
     [ div [class "tilesets"]
       [ h1 [] [text "Layers"]
-      , div [] (List.map viewLayer data.layers)
+      , div [] (List.map (viewLayer data.tilesets) data.layers)
       , h1 [] [text "Tilesets"]
       , div [] (List.map viewTileset data.tilesets)
       ]
     ]
 
 
-viewLayer : Layer -> Html
-viewLayer layer =
+viewLayer : List Tileset -> Layer -> Html
+viewLayer tilesets layer =
   div [class "layer"]
     [ h2 [] [text (layer.name ++ " " ++ (dimensions layer))]
-    , div [] [(viewLayerData layer)]
+    , div [] [(viewLayerData tilesets layer.data layer.width)]
     ]
 
 
-viewLayerData : Layer -> Html
-viewLayerData layer =
+viewLayerData : List Tileset -> List Int -> Int -> Html
+viewLayerData tilesets data width =
   let
-    f = (\y x -> x ++ (toString y))
+    d : List (List Html)
+    d = splitl width (List.map (viewLayerTile tilesets) data)
   in
-  div [] [text (List.foldl f " " layer.data)]
+  div []
+    (List.map (div [class "row"]) d)
+
+
+viewLayerTile : List Tileset -> Int -> Html
+viewLayerTile tilesets d =
+  div [class "tile"]
+    [ if d == 0 then
+        text ""
+      else
+        viewLayerTileImg tilesets d
+    ]
+
+
+viewLayerTileImg : List Tileset -> Int -> Html
+viewLayerTileImg tilesets d =
+  text (toString d)
+
 
 
 viewTileset : Tileset -> Html
@@ -60,7 +78,17 @@ viewTile (str, tile) =
     ]
 
 
+-- HELPERS & UTILS
+
 dimensions : { a | height : Int, width : Int } -> String
 dimensions x =
   "(" ++ (toString x.width) ++
   "x" ++ (toString x.height) ++ ")"
+
+
+splitl : Int -> List a -> List (List a)
+splitl k xs =
+  if List.length xs > k then
+    List.take k xs :: splitl k (List.drop k xs)
+  else
+    [xs]
