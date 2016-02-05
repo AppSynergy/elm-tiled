@@ -4,8 +4,8 @@ import Json.Decode as Json
 import Html exposing (Html)
 
 import Decoders.TiledMapXML as TMX
-import Examples.Summary as Summary
-
+--import Examples.Summary as Summary
+import Examples.Draw as Draw
 
 -- MODEL
 
@@ -18,7 +18,8 @@ view : TMXResult -> Html
 view data =
   case data of
     Ok value ->
-      Summary.view value
+        Draw.view value
+      --Summary.view value
     Err error ->
       Html.text error
 
