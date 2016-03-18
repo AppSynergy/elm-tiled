@@ -46,7 +46,7 @@ type alias Tileset =
   , tilecount : Int
   , firstgid : Int
   , tiles : List (String, Tile)
-  -- , properties :
+  , properties : List (String, String)
   , spacing : Int
   }
 
@@ -108,6 +108,7 @@ decodeTileSet =
     ("tilecount" := De.int) >>>
     ("firstgid" := De.int) >>>
     ("tiles" := (De.keyValuePairs decodeTile)) >>>
+    ("properties" := (De.keyValuePairs De.string)) >>>
     ("spacing" := De.int)
 
 
@@ -147,7 +148,7 @@ emptyTileset : Tileset
 emptyTileset =
   { name = "EMPTY"
   , firstgid = 0 , height = 0 , width = 0, tilecount = 0, spacing = 0
-  , tiles = []
+  , tiles = [], properties = []
   }
 
 

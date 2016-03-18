@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="64" tileheight="64" nextobjectid="1">
  <tileset firstgid="1" name="Tiles" tilewidth="128" tileheight="128" tilecount="16" columns="0">
+  <properties>
+   <property name="foo" value="bar"/>
+  </properties>
   <terraintypes>
    <terrain name="Dirt" tile="0"/>
   </terraintypes>
   <tile id="0" terrain="0,0,0,">
+   <properties>
+    <property name="FooBar" value="That bar where we met"/>
+   </properties>
    <image width="128" height="128" source="tiles/1.png"/>
   </tile>
   <tile id="1" terrain="0,0,,">
@@ -73,6 +79,9 @@
    <image width="101" height="101" source="objects/Crate.png"/>
   </tile>
   <tile id="6">
+   <properties>
+    <property name="deadgrass" value="1"/>
+   </properties>
    <image width="102" height="50" source="objects/Grass1.png"/>
   </tile>
   <tile id="7">
@@ -134,6 +143,9 @@
 </data>
  </layer>
  <layer name="ObjectForegroundLayer" width="32" height="32">
+  <properties>
+   <property name="Fizbang" value="pringles can"/>
+  </properties>
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
