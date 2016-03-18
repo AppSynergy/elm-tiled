@@ -20,11 +20,9 @@ all =
 unitTests: Tiled.TiledMapXML -> Test
 unitTests tmx =
   let
-    myLayerDict = Tiled.layerDict tmx
     myLayer_1 = Tiled.getLayer tmx "ObjectForegroundLayer"
     myLayer_2 = Tiled.getLayer tmx "TileLayer"
     myLayer_fail = Tiled.getLayer tmx "foozbarr"
-    myTilesetDict = Tiled.tilesetDict tmx
     myTileDict = Tiled.getTileDict tmx "Tiles"
     myTile_1 = Tiled.getTile myTileDict "1"
     myTile_6 = Tiled.getTile myTileDict "6"
@@ -34,18 +32,22 @@ unitTests tmx =
       |> test "height"
     , assertEqual tmx.width 32
       |> test "width"
-    , assertEqual (Dict.size myLayerDict) 3
+    , assertEqual tmx.orientation "orthogonal"
+      |> test "orientation"
+    , assertEqual (Tiled.layerCount tmx) 3
       |> test "layer count"
-    , assertEqual (Dict.size myLayerDict) (List.length tmx.layers)
+    , assertEqual 3 (List.length tmx.layers)
       |> test "equality"
-    , assertEqual (Dict.size myTilesetDict) 2
+    , assertEqual (Tiled.tilesetCount tmx) 2
       |> test "tileset count"
     , assertEqual myTile_1.image "tiles/2.png"
       |> test "tileset members"
     , assertEqual myTile_6.image "tiles/7.png"
       |> test "tileset members"
     , assertEqual myLayer_1.name "ObjectForegroundLayer"
-      |> test "layer members"
+      |> test "layer name"
+    , assertEqual myLayer_1.visible True
+      |> test "layer visible"
     , assertEqual myLayer_1.width 32
       |> test "layer members"
     , assertEqual (List.length myLayer_2.data) (32*32)

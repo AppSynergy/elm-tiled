@@ -1,4 +1,22 @@
-module Tiled where
+module Tiled
+  ( TiledMapXML, Layer, Tileset, Tile
+  , decode
+  , emptyLayer, emptyTileset, emptyTile
+  , getLayer, getTileDict, getTile
+  , layerCount, tilesetCount
+  ) where
+
+{-| Decode and use Tiled Map XML (.tmx) files.
+
+# Decode TMX
+@docs Decoder, Value
+
+# Fetch layers, tilesets or tiles
+@docs getLayer, getTileDict, getTile
+
+# Empty things. Why would you want these?
+@docs emptyLayer, emptyTileset, emptyTile
+-}
 
 import Dict exposing (Dict)
 import Json.Decode as De exposing (Decoder,(:=))
@@ -15,8 +33,8 @@ type alias TiledMapXML =
   , tilesets : List Tileset
   , version : Int
   , nextobjectid : Int
-  --, renderorder : String
-  --, orientation : String
+  , renderorder : String
+  , orientation : String
   --, properties : List Object
   }
 
@@ -47,55 +65,70 @@ type alias Layer =
   , name : String
   , data : List Int
   , layerType : String
-  --, visible : Bool?
+  , visible : Bool
   , opacity : Int
   }
 
 
 -- DECODERS
 
+{-| Implement the chainable decoder described [here](//groups.google.com/forum/m/#!topic/elm-discuss/2LxEUVe0UBo).
+  De.map TiledMapXML ("x" := De.int) >>> ("y" := De.int)
+-}
+(>>>) : Decoder (a -> b) -> Decoder a -> Decoder b
+(>>>) func value =
+    De.object2 (<|) func value
+
+
+{-| Decoder for the entire TMX file.
+  decode goodFile -> Ok TiledMapXML
+  decode badFile  -> Err String
+-}
 decode : Decoder TiledMapXML
 decode =
-  De.object8 TiledMapXML
-    ("height" := De.int)
-    ("width" := De.int)
-    ("tileheight" := De.int)
-    ("tilewidth" := De.int)
-    ("layers" := (De.list decodeLayer))
-    ("tilesets" := (De.list decodeTileSet))
-    ("version" := De.int)
-    ("nextobjectid" := De.int)
+  De.map TiledMapXML
+    ("height" := De.int) >>>
+    ("width" := De.int) >>>
+    ("tileheight" := De.int) >>>
+    ("tilewidth" := De.int) >>>
+    ("layers" := (De.list decodeLayer)) >>>
+    ("tilesets" := (De.list decodeTileSet)) >>>
+    ("version" := De.int) >>>
+    ("nextobjectid" := De.int) >>>
+    ("renderorder" := De.string) >>>
+    ("orientation" := De.string)
 
 
 decodeTileSet : Decoder Tileset
 decodeTileSet =
-  De.object7 Tileset
-    ("name" := De.string)
-    ("tileheight" := De.int)
-    ("tilewidth" := De.int)
-    ("tilecount" := De.int)
-    ("firstgid" := De.int)
-    ("tiles" := (De.keyValuePairs decodeTile))
+  De.map Tileset
+    ("name" := De.string) >>>
+    ("tileheight" := De.int) >>>
+    ("tilewidth" := De.int) >>>
+    ("tilecount" := De.int) >>>
+    ("firstgid" := De.int) >>>
+    ("tiles" := (De.keyValuePairs decodeTile)) >>>
     ("spacing" := De.int)
 
 
 decodeTile : Decoder Tile
 decodeTile =
-  De.object2 Tile
-    ("image" := De.string)
+  De.map Tile
+    ("image" := De.string) >>>
     (De.maybe ("terrain" := (De.list De.int)))
 
 
 decodeLayer : Decoder Layer
 decodeLayer =
-  De.object8 Layer
-    ("height" := De.int)
-    ("width" := De.int)
-    ("x" := De.int)
-    ("y" := De.int)
-    ("name" := De.string)
-    ("data" := (De.list De.int))
-    ("type" := De.string)
+  De.map Layer
+    ("height" := De.int) >>>
+    ("width" := De.int) >>>
+    ("x" := De.int) >>>
+    ("y" := De.int) >>>
+    ("name" := De.string) >>>
+    ("data" := (De.list De.int)) >>>
+    ("type" := De.string) >>>
+    ("visible" := De.bool) >>>
     ("opacity" := De.int)
 
 
@@ -104,7 +137,8 @@ decodeLayer =
 emptyLayer : Layer
 emptyLayer =
   { name = "EMPTY", layerType = "EMPTY"
-  , height = 0, width = 0, x = 0, y = 0 , opacity = 0
+  , height = 0, width = 0, x = 0, y = 0
+  , opacity = 0, visible = False
   , data = []
   }
 
@@ -144,6 +178,16 @@ tilesetDict tmx =
     entry = \ts dict -> Dict.insert ts.name (tileDict ts) dict
   in
   List.foldl entry Dict.empty tmx.tilesets
+
+
+layerCount : TiledMapXML -> Int
+layerCount tmx =
+  Dict.size <| layerDict tmx
+
+
+tilesetCount : TiledMapXML -> Int
+tilesetCount tmx =
+  Dict.size <| tilesetDict tmx
 
 
 tileDict : Tileset -> TileDict
