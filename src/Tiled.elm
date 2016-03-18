@@ -1,39 +1,155 @@
 module Tiled where
 
-import Json.Decode as Json
-import Html exposing (Html)
-
-import Decoders.TiledMapXML as TMX
---import Examples.Summary as Summary
-import Examples.Draw as Draw
-
--- MODEL
-
-type alias TMXResult = Result String TMX.TiledMapXML
+import Dict exposing (Dict)
+import Json.Decode as De exposing (Decoder,(:=))
 
 
--- VIEW
+-- MODELS
 
-view : TMXResult -> Html
-view data =
-  case data of
-    Ok value ->
-        Draw.view value
-      --Summary.view value
-    Err error ->
-      Html.text error
-
-
--- SIGNALS
-
-port tiledjson : Signal Json.Value
-
-
-data : Signal TMXResult
-data =
-  Signal.map (Json.decodeValue TMX.decoder) tiledjson
+type alias TiledMapXML =
+  { height : Int
+  , width : Int
+  , tileheight : Int
+  , tilewidth : Int
+  , layers : List Layer
+  , tilesets : List Tileset
+  --, version : Int
+  --, nextobjectid : Int
+  --, renderorder : String
+  --, orientation : String
+  --, properties : List Object
+  }
 
 
-main : Signal Html
-main =
-  Signal.map view data
+type alias Tileset =
+  { name : String
+  , height : Int
+  , width : Int
+  , tilecount : Int
+  , firstgid : Int
+  , tiles : List (String, Tile)
+  -- , properties : ?
+  -- , spacing : Int  ...etc
+  }
+
+
+type alias Tile =
+  { image : String
+  , terrain : Maybe (List Int)
+  }
+
+
+type alias Layer =
+  { height : Int
+  , width : Int
+  , x : Int
+  , y : Int
+  , name : String
+  , data : List Int
+  --, layerType : String
+  --, visible : Bool?
+  --, opacity : Int
+  }
+
+
+-- DECODERS
+
+decode : Decoder TiledMapXML
+decode =
+    De.object6 TiledMapXML
+      ("height" := De.int)
+      ("width" := De.int)
+      ("tileheight" := De.int)
+      ("tilewidth" := De.int)
+      ("layers" := (De.list decodeLayer))
+      ("tilesets" := (De.list decodeTileSet))
+
+
+decodeTileSet : Decoder Tileset
+decodeTileSet =
+    De.object6 Tileset
+      ("name" := De.string)
+      ("tileheight" := De.int)
+      ("tilewidth" := De.int)
+      ("tilecount" := De.int)
+      ("firstgid" := De.int)
+      ("tiles" := (De.keyValuePairs decodeTile))
+
+
+decodeTile : Decoder Tile
+decodeTile =
+  De.object2 Tile
+    ("image" := De.string)
+    (De.maybe ("terrain" := (De.list De.int)))
+
+
+decodeLayer : Decoder Layer
+decodeLayer =
+  De.object6 Layer
+    ("height" := De.int)
+    ("width" := De.int)
+    ("x" := De.int)
+    ("y" := De.int)
+    ("name" := De.string)
+    ("data" := (De.list De.int))
+
+
+-- INIT
+
+emptyTileset : Tileset
+emptyTileset =
+  { name = "EMPTY"
+  , firstgid = 0 , height = 0 , width = 0, tilecount = 0
+  , tiles = []
+  }
+
+emptyTile : Tile
+emptyTile =
+  { image = "NONE"
+  , terrain = Nothing
+  }
+
+
+
+
+-- METHODS
+
+layers : TiledMapXML -> List Layer
+layers data = data.layers
+
+
+type alias TilesetDict = Dict String (Dict String Tile)
+type alias TileDict = Dict String Tile
+
+tilesetDict : TiledMapXML -> TilesetDict
+tilesetDict data =
+  let
+    entry = \ts dict -> Dict.insert ts.name (tileDict ts) dict
+  in
+  List.foldl entry Dict.empty data.tilesets
+
+
+tileDict : Tileset -> TileDict
+tileDict tileset =
+  let
+    entry = \(tileid,tileobj) dict -> Dict.insert tileid tileobj dict
+  in
+  List.foldl entry Dict.empty tileset.tiles
+
+
+getTileDict : TilesetDict -> String -> TileDict
+getTileDict tilesetDict tilesetId =
+  Maybe.withDefault Dict.empty (Dict.get tilesetId tilesetDict)
+
+
+getTile : TileDict -> String -> Tile
+getTile tileDict tileId =
+  Maybe.withDefault emptyTile (Dict.get tileId tileDict)
+
+
+splitl : Int -> List a -> List (List a)
+splitl k xs =
+  if List.length xs > k then
+    List.take k xs :: splitl k (List.drop k xs)
+  else
+    [xs]

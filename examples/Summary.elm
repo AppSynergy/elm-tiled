@@ -7,7 +7,7 @@ import Decoders.Layer exposing (Layer)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Graphics.Element exposing (show)
+import Graphics.Element as Element exposing (show)
 import String
 
 
