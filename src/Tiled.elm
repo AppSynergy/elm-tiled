@@ -13,8 +13,8 @@ type alias TiledMapXML =
   , tilewidth : Int
   , layers : List Layer
   , tilesets : List Tileset
-  --, version : Int
-  --, nextobjectid : Int
+  , version : Int
+  , nextobjectid : Int
   --, renderorder : String
   --, orientation : String
   --, properties : List Object
@@ -28,8 +28,8 @@ type alias Tileset =
   , tilecount : Int
   , firstgid : Int
   , tiles : List (String, Tile)
-  -- , properties : ?
-  -- , spacing : Int  ...etc
+  -- , properties :
+  , spacing : Int
   }
 
 
@@ -46,9 +46,9 @@ type alias Layer =
   , y : Int
   , name : String
   , data : List Int
-  --, layerType : String
+  , layerType : String
   --, visible : Bool?
-  --, opacity : Int
+  , opacity : Int
   }
 
 
@@ -56,24 +56,27 @@ type alias Layer =
 
 decode : Decoder TiledMapXML
 decode =
-    De.object6 TiledMapXML
-      ("height" := De.int)
-      ("width" := De.int)
-      ("tileheight" := De.int)
-      ("tilewidth" := De.int)
-      ("layers" := (De.list decodeLayer))
-      ("tilesets" := (De.list decodeTileSet))
+  De.object8 TiledMapXML
+    ("height" := De.int)
+    ("width" := De.int)
+    ("tileheight" := De.int)
+    ("tilewidth" := De.int)
+    ("layers" := (De.list decodeLayer))
+    ("tilesets" := (De.list decodeTileSet))
+    ("version" := De.int)
+    ("nextobjectid" := De.int)
 
 
 decodeTileSet : Decoder Tileset
 decodeTileSet =
-    De.object6 Tileset
-      ("name" := De.string)
-      ("tileheight" := De.int)
-      ("tilewidth" := De.int)
-      ("tilecount" := De.int)
-      ("firstgid" := De.int)
-      ("tiles" := (De.keyValuePairs decodeTile))
+  De.object7 Tileset
+    ("name" := De.string)
+    ("tileheight" := De.int)
+    ("tilewidth" := De.int)
+    ("tilecount" := De.int)
+    ("firstgid" := De.int)
+    ("tiles" := (De.keyValuePairs decodeTile))
+    ("spacing" := De.int)
 
 
 decodeTile : Decoder Tile
@@ -85,23 +88,34 @@ decodeTile =
 
 decodeLayer : Decoder Layer
 decodeLayer =
-  De.object6 Layer
+  De.object8 Layer
     ("height" := De.int)
     ("width" := De.int)
     ("x" := De.int)
     ("y" := De.int)
     ("name" := De.string)
     ("data" := (De.list De.int))
+    ("type" := De.string)
+    ("opacity" := De.int)
 
 
 -- INIT
 
+emptyLayer : Layer
+emptyLayer =
+  { name = "EMPTY", layerType = "EMPTY"
+  , height = 0, width = 0, x = 0, y = 0 , opacity = 0
+  , data = []
+  }
+
+
 emptyTileset : Tileset
 emptyTileset =
   { name = "EMPTY"
-  , firstgid = 0 , height = 0 , width = 0, tilecount = 0
+  , firstgid = 0 , height = 0 , width = 0, tilecount = 0, spacing = 0
   , tiles = []
   }
+
 
 emptyTile : Tile
 emptyTile =
@@ -109,24 +123,27 @@ emptyTile =
   , terrain = Nothing
   }
 
-
-
-
 -- METHODS
 
-layers : TiledMapXML -> List Layer
-layers data = data.layers
-
-
+type alias LayerDict = Dict String Layer
 type alias TilesetDict = Dict String (Dict String Tile)
 type alias TileDict = Dict String Tile
 
+
+layerDict : TiledMapXML -> LayerDict
+layerDict tmx =
+  let
+    entry = \layer dict -> Dict.insert layer.name layer dict
+  in
+  List.foldl entry Dict.empty tmx.layers
+
+
 tilesetDict : TiledMapXML -> TilesetDict
-tilesetDict data =
+tilesetDict tmx =
   let
     entry = \ts dict -> Dict.insert ts.name (tileDict ts) dict
   in
-  List.foldl entry Dict.empty data.tilesets
+  List.foldl entry Dict.empty tmx.tilesets
 
 
 tileDict : Tileset -> TileDict
@@ -137,9 +154,18 @@ tileDict tileset =
   List.foldl entry Dict.empty tileset.tiles
 
 
-getTileDict : TilesetDict -> String -> TileDict
-getTileDict tilesetDict tilesetId =
-  Maybe.withDefault Dict.empty (Dict.get tilesetId tilesetDict)
+getLayer : TiledMapXML -> String -> Layer
+getLayer tmx layerName =
+  layerDict tmx
+    |> Dict.get layerName
+    |> Maybe.withDefault emptyLayer
+
+
+getTileDict : TiledMapXML -> String -> TileDict
+getTileDict tmx tilesetId =
+  tilesetDict tmx
+    |> Dict.get tilesetId
+    |> Maybe.withDefault Dict.empty
 
 
 getTile : TileDict -> String -> Tile

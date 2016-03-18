@@ -13,38 +13,52 @@ import ElmTest exposing (..)
 all : Test
 all =
   case Json.Decode.decodeString Tiled.decode str of
-    Ok data -> unitTests data
+    Ok tmx -> unitTests tmx
     Err _ -> errorTests
 
 
 unitTests: Tiled.TiledMapXML -> Test
-unitTests data =
+unitTests tmx =
   let
-    myLayers = Tiled.layers data
-    myTilesetDict = Tiled.tilesetDict data
-    myTileDict = Tiled.getTileDict myTilesetDict "Tiles"
-    myTileDict_1 = Tiled.getTile myTileDict "1"
+    myLayerDict = Tiled.layerDict tmx
+    myLayer_1 = Tiled.getLayer tmx "ObjectForegroundLayer"
+    myLayer_2 = Tiled.getLayer tmx "TileLayer"
+    myLayer_fail = Tiled.getLayer tmx "foozbarr"
+    myTilesetDict = Tiled.tilesetDict tmx
+    myTileDict = Tiled.getTileDict tmx "Tiles"
+    myTile_1 = Tiled.getTile myTileDict "1"
+    myTile_6 = Tiled.getTile myTileDict "6"
   in
   suite "TMX Decoder"
-    [ assertEqual data.height 32
+    [ assertEqual tmx.height 32
       |> test "height"
-    , assertEqual data.width 32
+    , assertEqual tmx.width 32
       |> test "width"
-    , assertEqual (List.length myLayers) 3
+    , assertEqual (Dict.size myLayerDict) 3
       |> test "layer count"
-    , assertEqual data.layers myLayers
+    , assertEqual (Dict.size myLayerDict) (List.length tmx.layers)
       |> test "equality"
     , assertEqual (Dict.size myTilesetDict) 2
       |> test "tileset count"
-    , assertEqual myTileDict_1.image "tiles/2.png"
+    , assertEqual myTile_1.image "tiles/2.png"
       |> test "tileset members"
+    , assertEqual myTile_6.image "tiles/7.png"
+      |> test "tileset members"
+    , assertEqual myLayer_1.name "ObjectForegroundLayer"
+      |> test "layer members"
+    , assertEqual myLayer_1.width 32
+      |> test "layer members"
+    , assertEqual (List.length myLayer_2.data) (32*32)
+      |> test "layer data"
+    , assertEqual myLayer_fail Tiled.emptyLayer
+      |> test "layer not found"
     ]
 
 
 errorTests : Test
 errorTests =
   suite "Test Error"
-    []
+    [ assertEqual "chalk" "cheese" |> test "You have a JSON error!"]
 
 
 str = """

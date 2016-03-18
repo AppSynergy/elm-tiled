@@ -36,7 +36,6 @@ gulp.task('test', () => {
   return gulp.src('tests/*.elm')
     .pipe(plumber())
     .pipe(elm())
-    //.pipe(gulp.dest('tmp/'))
     .on('error', swallowError)
     .pipe(shell(
       [ 'elm-test tests/TestRunner.elm' ]
