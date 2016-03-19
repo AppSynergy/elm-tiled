@@ -1,7 +1,8 @@
 module Tiled
   ( TiledMapXML, Layer, Tileset, Tile
   , decode
-  , getLayer, getTileDict, getTile
+  , getLayer, getFilledLayer
+  , getTileDict, getTile
   , layerCount, tilesetCount
   ) where
 
@@ -56,17 +57,36 @@ type alias Tile =
   }
 
 
+type alias LayerData = List Int
+
 type alias Layer =
   { height : Int
   , width : Int
   , x : Int
   , y : Int
   , name : String
-  , data : List Int
+  , data : LayerData
   , layerType : String
   , visible : Bool
   , opacity : Int
   }
+
+type alias FilledLayer =
+  { height : Int
+  , width : Int
+  , x : Int
+  , y : Int
+  , name : String
+  , data : List Tile
+  , layerType : String
+  , visible : Bool
+  , opacity : Int
+  }
+
+
+type alias LayerDict = Dict String Layer
+type alias TilesetDict = Dict String (Dict String Tile)
+type alias TileDict = Dict String Tile
 
 
 -- DECODERS
@@ -159,11 +179,6 @@ emptyTile =
 
 -- METHODS
 
-type alias LayerDict = Dict String Layer
-type alias TilesetDict = Dict String (Dict String Tile)
-type alias TileDict = Dict String Tile
-
-
 layerDict : TiledMapXML -> LayerDict
 layerDict tmx =
   let
@@ -212,8 +227,22 @@ getFilledLayer tmx layerName =
   in
    fill layer
 
-type alias FilledLayer = Layer
-fill = identity
+
+fill : Layer -> FilledLayer
+fill layer =
+  let
+    data = List.map (\x -> emptyTile) layer.data
+  in
+  { layer | data = data }
+
+
+getFilledLayerImage : TiledMapXML -> String -> List Tile
+getFilledLayerImage tmx layerName =
+  let
+    filledLayer = getFilledLayer tmx layerName
+  in
+  filledLayer.data
+
 
 getTileDict : TiledMapXML -> String -> TileDict
 getTileDict tmx tilesetId =

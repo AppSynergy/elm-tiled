@@ -53,8 +53,8 @@
          "name":"Tiles",
          "properties":
             {
-             "foo":"bar",
-             "Fizbang":"pringles can"
+             "foo": "bar",
+             "Fizbang": "pringles can"
             },
          "spacing":0,
          "terrains":[
