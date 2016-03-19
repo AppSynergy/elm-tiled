@@ -1,7 +1,6 @@
 module Tiled
   ( TiledMapXML, Layer, Tileset, Tile
   , decode
-  , emptyLayer, emptyTileset, emptyTile
   , getLayer, getTileDict, getTile
   , layerCount, tilesetCount
   ) where
@@ -14,8 +13,8 @@ module Tiled
 # Fetch layers, tilesets or tiles
 @docs getLayer, getTileDict, getTile
 
-# Empty things. Why would you want these?
-@docs emptyLayer, emptyTileset, emptyTile
+# Count Layers or Tilesets
+@docs layerCount, tilesetCount
 -}
 
 import Dict exposing (Dict)
@@ -206,6 +205,16 @@ getLayer tmx layerName =
     |> Maybe.withDefault emptyLayer
 
 
+getFilledLayer : TiledMapXML -> String -> FilledLayer
+getFilledLayer tmx layerName =
+  let
+    layer = getLayer tmx layerName
+  in
+   fill layer
+
+type alias FilledLayer = Layer
+fill = identity
+
 getTileDict : TiledMapXML -> String -> TileDict
 getTileDict tmx tilesetId =
   tilesetDict tmx
@@ -213,6 +222,9 @@ getTileDict tmx tilesetId =
     |> Maybe.withDefault Dict.empty
 
 
+{-| Get a tile from a tile dictionary (wraps `Dict.get` with emptyTile).
+  getTile (getTileDict tmx "Tileset Name") "Tile ID"
+-}
 getTile : TileDict -> String -> Tile
 getTile tileDict tileId =
   Maybe.withDefault emptyTile (Dict.get tileId tileDict)

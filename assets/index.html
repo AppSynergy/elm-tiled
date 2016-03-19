@@ -3,7 +3,7 @@
   <head>
     <meta charset='utf-8'>
     <link rel="stylesheet" media="screen" href="example.css"/>
-    <script src="Tiled.js" type="text/javascript"></script>
+    <script src="Simple.js" type="text/javascript"></script>
   </head>
   <body>
     <div id="main"></div>
@@ -22,13 +22,13 @@
       }
 
       var app = Elm.embed(
-        Elm.Tiled,
+        Elm.Simple,
         document.getElementById('main'),
-        {tiledjson: ""}
+        {tmxFile: ""}
       );
 
       loadJSON('../assets/Tiled.json', function(response) {
-        app.ports.tiledjson.send(JSON.parse(response));
+        app.ports.tmxFile.send(JSON.parse(response));
       });
 
     </script>

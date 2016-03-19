@@ -50,9 +50,11 @@ unitTests tmx =
       |> test "layer visible"
     , assertEqual myLayer_1.width 32
       |> test "layer members"
+    , assertEqual (List.sum myLayer_1.data) 112
+      |> test "rough test for data integrity - is sum correct?"
     , assertEqual (List.length myLayer_2.data) (32*32)
       |> test "layer data"
-    , assertEqual myLayer_fail Tiled.emptyLayer
+    , assertEqual myLayer_fail.name "EMPTY"
       |> test "layer not found"
     ]
 

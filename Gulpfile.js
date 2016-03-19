@@ -13,17 +13,17 @@ swallowError = function(error) {
 gulp.task('default', ['elm', 'index']);
 
 
-gulp.task('watch', function() {
-  gulp.watch('{src/**,assets/**}', ['elm','index']);
+gulp.task('examplewatch', function() {
+  gulp.watch('{src/**,examples/**}', ['example']);
 });
 
 gulp.task('testwatch', function() {
   gulp.watch('{src/**,tests/**}', ['test']);
 });
 
-gulp.task('elm', function() {
+gulp.task('example', ['index'], function() {
   elm.init();
-  return gulp.src('src/Tiled.elm')
+  return gulp.src('examples/Simple.elm')
     .pipe(plumber())
     .pipe(elm())
     .pipe(uglify())
