@@ -26,6 +26,7 @@ unitTests tmx =
     myTileDict = Tiled.getTileDict tmx "Tiles"
     myTile_1 = Tiled.getTile myTileDict "1"
     myTile_6 = Tiled.getTile myTileDict "6"
+    myLayerImage = Tiled.getFilledLayerImage tmx "TileLayer"
   in
   suite "TMX Decoder"
     [ assertEqual tmx.height 32
@@ -40,9 +41,9 @@ unitTests tmx =
       |> test "equality"
     , assertEqual (Tiled.tilesetCount tmx) 2
       |> test "tileset count"
-    , assertEqual myTile_1.image "tiles/2.png"
+    , assertEqual myTile_1.image "tiles/1.png"
       |> test "tileset members"
-    , assertEqual myTile_6.image "tiles/7.png"
+    , assertEqual myTile_6.image "tiles/6.png"
       |> test "tileset members"
     , assertEqual myLayer_1.name "ObjectForegroundLayer"
       |> test "layer name"
