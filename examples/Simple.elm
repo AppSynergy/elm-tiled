@@ -12,14 +12,11 @@ import Tiled
 port tmxFile : Signal Json.Value
 
 
-data : Signal (Result String Tiled.TiledMapXML)
-data =
-  Signal.map (Json.decodeValue Tiled.decode) tmxFile
-
-
 main : Signal Html.Html
 main =
-  Signal.map view data
+  tmxFile
+    |> Signal.map (Json.decodeValue Tiled.decode)
+    |> Signal.map view
 
 -- VIEW
 
