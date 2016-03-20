@@ -37,7 +37,7 @@ view data =
           , Html.fromElement <| Tiled.getFilledLayerImage tmx "TileLayer"
           , Html.fromElement <| Tiled.getAllLayersImage tmx
           , toHtml <| Tiled.getTile tileset "4"
-          , Html.fromElement <| Tiled.getTileElement tileset "4"
+          --, Html.fromElement <| Tiled.getTileElement tileset "4"
           --, toHtml <| Tiled.getAllTileDict tmx
           ]
     Err _ ->

@@ -1,13 +1,8 @@
 module Tiled.Decoder where
 
-import Dict exposing (Dict)
 import Json.Decode as De exposing (Decoder,(:=))
 
-import Tiled.Model exposing
-  ( TiledMapXML, Tile, Tileset
-  , FilledLayer, Layer
-  , TileDict, TilesetDict
-  )
+import Tiled.Model exposing (TiledMapXML, Tile, Tileset, Layer)
 
 -- DECODERS
 
