@@ -6,7 +6,7 @@ import Graphics.Element as Element exposing (Element)
 import Graphics.Collage as Draw
 
 import Tiled.Model exposing
-  ( TiledMapXML, TileDict, Tile
+  ( TiledMapXML, TileDict, Tileset, Tile
   , Layer, FilledLayer
   )
 
@@ -16,39 +16,48 @@ type alias FormMatrix = List (List Draw.Form)
 
 tileElement : Tile -> Element
 tileElement tile =
+  let
+    globalScale = 0.5
+    scale x = toFloat x |> (*) globalScale |> round
+    h = Maybe.withDefault 16 tile.tileheight |> scale
+    w = Maybe.withDefault 16 tile.tilewidth |> scale
+  in
   case tile.image of
     "NONE" -> Element.empty
-    _ -> Element.image 64 64 <| "../assets/" ++ tile.image
+    _ -> Element.image w h <| "../assets/" ++ tile.image
 
 
-setPositions : FormMatrix -> FormMatrix
-setPositions matrix =
+setPositions : Int -> Int -> FormMatrix -> FormMatrix
+setPositions width height matrix =
   let
-    scale = 32
-    offset = 450
+    globalScale = 0.5
+    scaleX = toFloat width
+    scaleY = toFloat height
+    offsetX = 450
+    offsetY = 543
     pos w h = Draw.move
-      ( ((toFloat w ) * scale) - offset
-      , offset - ((toFloat h) * scale)
+      ( ((toFloat w ) * scaleX * globalScale) - offsetX
+      , offsetY - ((toFloat h) * scaleY * globalScale)
       )
     im = List.indexedMap
   in
   im (\i r -> im (\j t -> pos j i t) r) matrix
-  --List.indexedMap (\i row -> List.indexedMap (\j tile -> pos j i tile) row) matrix
 
 
-
-filledLayerImage : FilledLayer -> Element
-filledLayerImage filledLayer =
+filledLayerImage : TiledMapXML -> FilledLayer -> Element
+filledLayerImage tmx filledLayer =
   let
+    w = filledLayer.width * tmx.tileheight // 2 |> (+) 150
+    h = filledLayer.height * tmx.tilewidth // 2 |> (+) 50
     elements = filledLayer.data
       |> List.map tileElement
       |> List.map Draw.toForm
-      |> splitl 32
-      |> setPositions
-      |> List.concat
-      |> (::) (Draw.rect 1200 1000 |> Draw.filled Color.blue)
+      |> splitl filledLayer.width
+      >> setPositions tmx.tilewidth tmx.tileheight
+      >> List.concat
+      >> (::) (Draw.rect (toFloat w) (toFloat h) |> Draw.filled Color.blue)
   in
-  Draw.collage 1200 1000 elements
+  Draw.collage w h elements
 
 
 fill : (Int -> Tile) -> Layer -> FilledLayer

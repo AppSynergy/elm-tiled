@@ -33,10 +33,10 @@ view data =
         in Html.div []
           [ Html.h2 [] [Html.text "Simple output"]
           --, toHtml tmx
-          , toHtml <| Tiled.getLayer tmx "TileLayer"
+          --, toHtml <| Tiled.getLayer tmx "TileLayer"
           , Html.fromElement <| Tiled.getFilledLayerImage tmx "TileLayer"
-          , Html.fromElement <| Tiled.getAllLayersImage tmx
-          , toHtml <| Tiled.getTile tileset "4"
+          --, Html.fromElement <| Tiled.getAllLayersImage tmx
+          --, toHtml <| Tiled.getTile tileset "4"
           --, Html.fromElement <| Tiled.getTileElement tileset "4"
           --, toHtml <| Tiled.getAllTileDict tmx
           ]

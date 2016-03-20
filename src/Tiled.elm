@@ -85,7 +85,7 @@ getFilledLayer tmx layerName =
 getFilledLayerImage : TiledMapXML -> String -> Element
 getFilledLayerImage tmx layerName =
   getFilledLayer tmx layerName
-    |> Tiled.Graphics.filledLayerImage
+    |> Tiled.Graphics.filledLayerImage tmx
 
 
 getAllLayersImage : TiledMapXML -> Element
@@ -125,10 +125,17 @@ getTileset tmx tilesetId =
 tileDict : Tileset -> TileDict
 tileDict tileset =
   let
-    key k = case String.toInt k of
-      Ok i -> toString (i + tileset.firstgid)
-      Err s -> "0"
-    entry (k, v) dict = Dict.insert (key k) v dict
+    toGid key =
+      case String.toInt key of
+        Ok i -> toString (i + tileset.firstgid)
+        Err s -> "0"
+    addWidths tile =
+      { tile
+      | tileheight = Just tileset.tileheight
+      , tilewidth = Just tileset.tilewidth
+      }
+    entry (key, tile) dict =
+      Dict.insert (toGid key) (addWidths tile) dict
   in
   List.foldl entry Dict.empty tileset.tiles
 
@@ -156,7 +163,7 @@ getTile tileDict tileId =
     |> Maybe.withDefault emptyTile
 
 
-getTileElement : TileDict -> String -> Element
+getTileElement :TileDict -> String -> Element
 getTileElement tileDict tileId =
   getTile tileDict tileId
     |> Tiled.Graphics.tileElement

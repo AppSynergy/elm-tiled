@@ -50,7 +50,9 @@ decodeTile : Decoder Tile
 decodeTile =
   De.map Tile
     ("image" := De.string) >>>
-    (De.maybe ("terrain" := (De.list De.int)))
+    (De.maybe ("terrain" := (De.list De.int))) >>>
+    (De.maybe ("tileheight" := De.int)) >>>
+    (De.maybe ("tilewidth" := De.int))
 
 
 decodeLayer : Decoder Layer
@@ -90,5 +92,5 @@ emptyTile : Tile
 emptyTile =
   { image = "NONE"
   , terrain = Nothing
-  --, height = 0 , width = 0
+  , tileheight = Nothing , tilewidth = Nothing
   }

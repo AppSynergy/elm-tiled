@@ -20,8 +20,8 @@ type alias TiledMapXML =
 
 type alias Tileset =
   { name : String
-  , height : Int
-  , width : Int
+  , tileheight : Int
+  , tilewidth : Int
   , tilecount : Int
   , firstgid : Int
   , tiles : List (String, Tile)
@@ -33,6 +33,8 @@ type alias Tileset =
 type alias Tile =
   { image : String
   , terrain : Maybe (List Int)
+  , tileheight : Maybe Int
+  , tilewidth : Maybe Int
   }
 
 
