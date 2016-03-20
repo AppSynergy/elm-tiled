@@ -17,7 +17,7 @@ all =
     Err _ -> errorTests
 
 
-unitTests: Tiled.TiledMapXML -> Test
+unitTests: Tiled.Map -> Test
 unitTests tmx =
   let
     myLayer_1 = Tiled.getLayer tmx "ObjectForegroundLayer"

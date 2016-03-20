@@ -24,7 +24,7 @@ toHtml x =
   Html.fromElement (Ele.show x)
 
 
-view : Result String Tiled.TiledMapXML -> Html.Html
+view : Result String Tiled.Map -> Html.Html
 view data =
   case data of
     Ok tmx ->
