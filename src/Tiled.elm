@@ -2,9 +2,11 @@ module Tiled
   ( TiledMapXML, Layer, Tileset, Tile
   , decode
   , getLayer, getFilledLayer, getFilledLayerImage
-  , getTileDict, getAllTileDict, getAnyTile
+  , getAllLayersImage
+  , getTileset, getAllTileDict, getAnyTile
   , getTile, getTileElement
   , layerCount, tilesetCount
+  , tileDict
   ) where
 
 {-| Decode and use Tiled Map XML (.tmx) files.
@@ -63,6 +65,7 @@ type alias Tile =
 
 type alias LayerData = List Int
 
+
 type alias Layer =
   { height : Int
   , width : Int
@@ -89,7 +92,7 @@ type alias FilledLayer =
 
 
 type alias LayerDict = Dict String Layer
-type alias TilesetDict = Dict String (Dict String Tile)
+type alias TilesetDict = Dict String Tileset
 type alias TileDict = Dict String Tile
 
 
@@ -130,7 +133,7 @@ decodeTileSet =
     ("tilewidth" := De.int) >>>
     ("tilecount" := De.int) >>>
     ("firstgid" := De.int) >>>
-    ("tiles" := (De.keyValuePairs decodeTile)) >>>
+    ("tiles" := ((De.keyValuePairs decodeTile))) >>>
     ("properties" := (De.keyValuePairs De.string)) >>>
     ("spacing" := De.int)
 
@@ -179,6 +182,7 @@ emptyTile : Tile
 emptyTile =
   { image = "NONE"
   , terrain = Nothing
+  --, height = 0 , width = 0
   }
 
 -- METHODS
@@ -194,7 +198,7 @@ layerDict tmx =
 tilesetDict : TiledMapXML -> TilesetDict
 tilesetDict tmx =
   let
-    entry = \ts dict -> Dict.insert ts.name (tileDict ts) dict
+    entry = \ts dict -> Dict.insert ts.name ts dict
   in
   List.foldl entry Dict.empty tmx.tilesets
 
@@ -250,12 +254,21 @@ getFilledLayerImage tmx layerName =
     elements = filledLayer.data
       |> List.map tileElement
       |> List.map Draw.toForm
-      |> splitl 32
+      |> splitl tmx.width
       |> List.indexedMap (\i row -> List.indexedMap (\j tile -> positionTile j i tile) row)
       |> List.concat
       |> (::) (Draw.rect 1200 1000 |> Draw.filled Color.blue)
   in
   Draw.collage 1200 1000 elements
+
+
+getAllLayersImage : TiledMapXML -> Ele.Element
+getAllLayersImage tmx =
+  layerDict tmx
+    |> Dict.map (\k v -> getFilledLayerImage tmx k)
+    |> Dict.values
+    |> List.map Draw.toForm
+    |> Draw.collage 1200 1000
 
 
 positionTile : Int -> Int -> Draw.Form -> Draw.Form
@@ -270,11 +283,12 @@ positionTile w h tile =
     )
 
 
-getTileDict : TiledMapXML -> String -> TileDict
-getTileDict tmx tilesetId =
+getTileset : TiledMapXML -> String -> TileDict
+getTileset tmx tilesetId =
   tilesetDict tmx
     |> Dict.get tilesetId
-    |> Maybe.withDefault Dict.empty
+    |> Maybe.withDefault emptyTileset
+    |> tileDict
 
 
 getAllTileDict : TiledMapXML -> TileDict
@@ -282,20 +296,22 @@ getAllTileDict tmx =
   let
     entry = \k v all -> Dict.union v all
   in
-  Dict.foldl entry Dict.empty (tilesetDict tmx)
+  tilesetDict tmx
+    |> Dict.map (\_ a -> tileDict a)
+    |> Dict.foldl entry Dict.empty
 
 
 getAnyTile: TiledMapXML -> String -> Tile
 getAnyTile tmx tileId =
-  Maybe.withDefault emptyTile (Dict.get tileId (getAllTileDict tmx))
+  getAllTileDict tmx
+    |> Dict.get tileId
+    |> Maybe.withDefault emptyTile
 
 
-{-| Get a tile from a tile dictionary (wraps `Dict.get` with emptyTile).
-  getTile (getTileDict tmx "Tileset Name") "Tile ID"
--}
 getTile : TileDict -> String -> Tile
 getTile tileDict tileId =
-  Maybe.withDefault emptyTile (Dict.get tileId tileDict)
+  Dict.get tileId tileDict
+    |> Maybe.withDefault emptyTile
 
 
 getTileElement : TileDict -> String -> Ele.Element

@@ -23,9 +23,9 @@ unitTests tmx =
     myLayer_1 = Tiled.getLayer tmx "ObjectForegroundLayer"
     myLayer_2 = Tiled.getLayer tmx "TileLayer"
     myLayer_fail = Tiled.getLayer tmx "foozbarr"
-    myTileDict = Tiled.getTileDict tmx "Tiles"
-    myTile_1 = Tiled.getTile myTileDict "1"
-    myTile_6 = Tiled.getTile myTileDict "6"
+    myTileset = Tiled.getTileset tmx "Tiles"
+    myTile_1 = Tiled.getTile myTileset "1"
+    myTile_6 = Tiled.getTile myTileset "6"
     myLayerImage = Tiled.getFilledLayerImage tmx "TileLayer"
   in
   suite "TMX Decoder"
