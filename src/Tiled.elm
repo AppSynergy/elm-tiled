@@ -54,43 +54,19 @@ decode =
   Tiled.Decoder.decode
 
 
--- METHODS
-
-layerDict : TiledMapXML -> LayerDict
-layerDict tmx =
-  let
-    entry = \layer dict -> Dict.insert layer.name layer dict
-  in
-  List.foldl entry Dict.empty tmx.layers
-
-
-tilesetDict : TiledMapXML -> TilesetDict
-tilesetDict tmx =
-  let
-    entry = \ts dict -> Dict.insert ts.name ts dict
-  in
-  List.foldl entry Dict.empty tmx.tilesets
-
+-- LAYERS
 
 layerCount : TiledMapXML -> Int
 layerCount tmx =
   Dict.size <| layerDict tmx
 
 
-tilesetCount : TiledMapXML -> Int
-tilesetCount tmx =
-  Dict.size <| tilesetDict tmx
-
-
-tileDict : Tileset -> TileDict
-tileDict tileset =
+layerDict : TiledMapXML -> LayerDict
+layerDict tmx =
   let
-    key k = case String.toInt k of
-      Ok i -> toString (i + tileset.firstgid)
-      Err s -> "0"
-    entry = \(k, v) dict -> Dict.insert (key k) v dict
+    entry layer dict = Dict.insert layer.name layer dict
   in
-  List.foldl entry Dict.empty tileset.tiles
+  List.foldl entry Dict.empty tmx.layers
 
 
 getLayer : TiledMapXML -> String -> Layer
@@ -108,11 +84,8 @@ getFilledLayer tmx layerName =
 
 getFilledLayerImage : TiledMapXML -> String -> Element
 getFilledLayerImage tmx layerName =
-  let
-    fl : FilledLayer
-    fl = getFilledLayer tmx layerName
-  in
-  Tiled.Graphics.filledLayerImage fl
+  getFilledLayer tmx layerName
+    |> Tiled.Graphics.filledLayerImage
 
 
 getAllLayersImage : TiledMapXML -> Element
@@ -124,6 +97,21 @@ getAllLayersImage tmx =
     |> Draw.collage 1200 1000
 
 
+-- TILESETS
+
+tilesetCount : TiledMapXML -> Int
+tilesetCount tmx =
+  Dict.size <| tilesetDict tmx
+
+
+tilesetDict : TiledMapXML -> TilesetDict
+tilesetDict tmx =
+  let
+    entry ts dict = Dict.insert ts.name ts dict
+  in
+  List.foldl entry Dict.empty tmx.tilesets
+
+
 getTileset : TiledMapXML -> String -> TileDict
 getTileset tmx tilesetId =
   tilesetDict tmx
@@ -132,10 +120,23 @@ getTileset tmx tilesetId =
     |> tileDict
 
 
+-- TILES
+
+tileDict : Tileset -> TileDict
+tileDict tileset =
+  let
+    key k = case String.toInt k of
+      Ok i -> toString (i + tileset.firstgid)
+      Err s -> "0"
+    entry (k, v) dict = Dict.insert (key k) v dict
+  in
+  List.foldl entry Dict.empty tileset.tiles
+
+
 getAllTileDict : TiledMapXML -> TileDict
 getAllTileDict tmx =
   let
-    entry = \k v all -> Dict.union v all
+    entry k v all = Dict.union v all
   in
   tilesetDict tmx
     |> Dict.map (\_ a -> tileDict a)
@@ -157,4 +158,5 @@ getTile tileDict tileId =
 
 getTileElement : TileDict -> String -> Element
 getTileElement tileDict tileId =
-  getTile tileDict tileId |> Tiled.Graphics.tileElement
+  getTile tileDict tileId
+    |> Tiled.Graphics.tileElement

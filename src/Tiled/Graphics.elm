@@ -11,6 +11,9 @@ import Tiled.Model exposing
   )
 
 
+type alias FormMatrix = List (List Draw.Form)
+
+
 tileElement : Tile -> Element
 tileElement tile =
   case tile.image of
@@ -18,16 +21,20 @@ tileElement tile =
     _ -> Element.image 64 64 <| "../assets/" ++ tile.image
 
 
-pos : Int -> Int -> Draw.Form -> Draw.Form
-pos w h tile =
+setPositions : FormMatrix -> FormMatrix
+setPositions matrix =
   let
     scale = 32
     offset = 450
+    pos w h = Draw.move
+      ( ((toFloat w ) * scale) - offset
+      , offset - ((toFloat h) * scale)
+      )
+    im = List.indexedMap
   in
-  tile |> Draw.move
-    ( ((toFloat w ) * scale) - offset
-    , offset - ((toFloat h) * scale)
-    )
+  im (\i r -> im (\j t -> pos j i t) r) matrix
+  --List.indexedMap (\i row -> List.indexedMap (\j tile -> pos j i tile) row) matrix
+
 
 
 filledLayerImage : FilledLayer -> Element
@@ -37,7 +44,7 @@ filledLayerImage filledLayer =
       |> List.map tileElement
       |> List.map Draw.toForm
       |> splitl 32
-      |> List.indexedMap (\i row -> List.indexedMap (\j tile -> pos j i tile) row)
+      |> setPositions
       |> List.concat
       |> (::) (Draw.rect 1200 1000 |> Draw.filled Color.blue)
   in
